@@ -7,6 +7,10 @@ import os.path
 import time
 import os
 
+
+'''
+For collecting video data
+'''
 if not os.path.exists("./1"):
     for i in range(1,6):
         os.makedirs("./"+str(i)+"/")
@@ -15,6 +19,8 @@ def current_milli_time():
     return round(time.time() * 1000)
 
 prevTime = current_milli_time()
+
+
 
 '''
 Setting for general purpose
@@ -49,6 +55,8 @@ def receivingUDP():
     loopCount = 0
     global isRecording
     global isSent
+    global isTestMode
+    global address
     isRecording = False
     isSent = False
 
@@ -56,14 +64,25 @@ def receivingUDP():
         data, addr = sock.recvfrom(128)
         dataStr = data.decode('ascii')
 
-        if(loopCount == 0):
-            global address
+        
+        if(dataStr[:4] == "test"):
             addrList = list(addr)
-            addrList[1] = int(dataStr)
+            addrList[1] = int(dataStr[4:])
             address = tuple(addrList)
-            print("send ack")
-            sendUDP("ack")
-
+            print("ack")
+            
+            isTestMode = True
+            print("Test mode is activated")
+            
+            
+        elif(dataStr[:4] == "real"):
+            addrList = list(addr)
+            addrList[1] = int(dataStr[4:])
+            address = tuple(addrList)
+            print("ack")
+            
+            isTestMode = False
+            print("Real mode is activated")
         loopCount += 1
 
 
@@ -108,7 +127,8 @@ while (True):
             fileList = os.listdir('./'+str(curIndex))
             filePath = './'+str(curIndex)+'/'+str(len(fileList))+'.avi'
             
-            videoWriter = cv2.VideoWriter(filePath, fourcc, 30.0, (640,480))
+            if(not isTestMode):
+                videoWriter = cv2.VideoWriter(filePath, fourcc, 30.0, (640,480))
             sendUDP(str(curIndex))
             prevTime = current_milli_time()
             isRecording = True
@@ -117,15 +137,17 @@ while (True):
 
     elif input == 122:
         #z
-        os.remove(filePath)
+        if(not isTestMode):
+            os.remove(filePath)
         sendUDP('delete')
         
-    if(isRecording):
+    if(isRecording and not isTestMode):
         videoWriter.write(frame)
     if(isRecording and prevTime+2000 < current_milli_time()):
         isRecording = False;
         isSent = False;
-        videoWriter.release()
+        if(not isTestMode):
+            videoWriter.release()
         
  
 capture.release()
