@@ -7,6 +7,8 @@
 ### 3. Run the code by "python ./dataCollector.py" (Note! the mobile app should be running before you run the python code)
 
 
+
+
 ## How to use
 
 ### 1. Click the camera view
