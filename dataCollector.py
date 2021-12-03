@@ -48,7 +48,6 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(('', ReceivingPort))
 
 def sendUDP(data):
-    print(address)
     sock.sendto(str.encode(data), address)
 
 def receivingUDP():
@@ -129,7 +128,8 @@ while (True):
             
             if(not isTestMode):
                 videoWriter = cv2.VideoWriter(filePath, fourcc, 30.0, (640,480))
-            sendUDP(str(curIndex))
+            print(str(curIndex)+str(len(fileList)));
+            sendUDP(str(curIndex)+str(len(fileList)))
             prevTime = current_milli_time()
             isRecording = True
         else:
